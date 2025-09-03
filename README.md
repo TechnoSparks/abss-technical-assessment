@@ -42,7 +42,7 @@ Before running this project, ensure you have the following installed:
 
 - **PHP** >= 8.2 with **SQLite extension enabled**
 
-- **Node.js** >= 18.x
+- **Node.js** >= 20.x
 
 - **npm** or **yarn**
 
