@@ -1,0 +1,15 @@
+node_modules
+.git
+.gitignore
+README.md
+.angular/cache
+dist
+npm-debug.log
+yarn-error.log
+.DS_Store
+.vscode
+.idea
+coverage
+e2e
+src/**/*.spec.ts
+*.log

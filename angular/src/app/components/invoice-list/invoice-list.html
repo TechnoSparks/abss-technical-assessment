@@ -1,0 +1,154 @@
+<div class="invoice-list-container">
+  <h1 id="appNameH1">Invoice Management</h1>
+
+  <!-- Search -->
+  <div class="search-container">
+    <div class="search-input-group">
+      <input
+        type="text"
+        placeholder="Search invoices by number, customer, reference, date, or amount..."
+        [value]="searchInput()"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearchSubmit()"
+        class="search-input"
+        [disabled]="searchLoading()"
+      />
+      <button
+        type="button"
+        (click)="onSearchSubmit()"
+        [disabled]="searchLoading()"
+        class="search-button">
+        {{ searchLoading() ? 'Searching...' : 'Search' }}
+      </button>
+      <button
+        type="button"
+        (click)="onClearSearch()"
+        [disabled]="searchLoading() || !searchTerm()"
+        class="clear-button">
+        Clear
+      </button>
+    </div>
+    <div class="search-info" *ngIf="searchTerm() && !searchLoading()">
+      <span *ngIf="filteredInvoices().length > 0">
+        Showing {{ filteredInvoices().length }} results for "{{ searchTerm() }}"
+      </span>
+      <span *ngIf="filteredInvoices().length === 0" class="no-results">
+        No results found for "{{ searchTerm() }}"
+      </span>
+    </div>
+    <div class="search-loading" *ngIf="searchLoading()">
+      Searching...
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading">
+    <p>Loading invoices...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error">
+    <p>{{ error() }}</p>
+    <button (click)="loadInvoices()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="successMessage()" class="success">
+    <p>{{ successMessage() }}</p>
+  </div>
+
+  <!-- Invoice List -->
+  <div *ngIf="!loading() && !error()" class="invoice-content">
+
+    <!-- Summary -->
+    <div class="summary">
+      <p>Total Invoices: {{ totalInvoices() }}</p>
+      <p>Page {{ currentPage() }} of {{ totalPages() }}</p>
+    </div>
+
+    <!-- Invoice Table -->
+    <div class="table-container">
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sortBy('number')" (keydown.enter)="sortBy('number')" [class.sorted]="isSorted('number')" tabindex="0">
+              Invoice Number
+              <span class="sort-icon">{{ getSortIcon('number') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('date')" (keydown.enter)="sortBy('date')" [class.sorted]="isSorted('date')" tabindex="0">
+              Date
+              <span class="sort-icon">{{ getSortIcon('date') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('customer')" (keydown.enter)="sortBy('customer')" [class.sorted]="isSorted('customer')" tabindex="0">
+              Customer
+              <span class="sort-icon">{{ getSortIcon('customer') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('reference')" (keydown.enter)="sortBy('reference')" [class.sorted]="isSorted('reference')" tabindex="0">
+              Reference
+              <span class="sort-icon">{{ getSortIcon('reference') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('items')" (keydown.enter)="sortBy('items')" [class.sorted]="isSorted('items')" tabindex="0">
+              Items
+              <span class="sort-icon">{{ getSortIcon('items') }}</span>
+            </th>
+            <th class="sortable" (click)="sortBy('total')" (keydown.enter)="sortBy('total')" [class.sorted]="isSorted('total')" tabindex="0">
+              Total Amount
+              <span class="sort-icon">{{ getSortIcon('total') }}</span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let invoice of searchTerm() ? filteredInvoices() : invoices()" class="invoice-row">
+            <td class="invoice-number">{{ invoice.number }}</td>
+            <td>{{ invoice.date | date:'dd/MM/yy' }}</td>
+            <td class="customer-name">{{ invoice.customer_name }}</td>
+            <td>{{ invoice.reference }}</td>
+            <td class="items-count">{{ invoice.invoice_items.length }} item(s)</td>
+            <td class="total-amount">${{ getTotalAmount(invoice) | number:'1.2-2' }}</td>
+            <td class="actions">
+              <button class="view-btn" (click)="openViewModal(invoice)">View</button>
+              <button class="edit-btn" (click)="openEditModal(invoice)">Edit</button>
+              <button class="delete-btn" (click)="deleteInvoice(invoice)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages() > 1 && !searchTerm()">
+      <button
+        (click)="onPageChange(currentPage() - 1)"
+        [disabled]="currentPage() === 1"
+        class="page-btn">
+        Previous
+      </button>
+
+      <span class="page-info">
+        Page {{ currentPage() }} of {{ totalPages() }}
+      </span>
+
+      <button
+        (click)="onPageChange(currentPage() + 1)"
+        [disabled]="currentPage() === totalPages()"
+        class="page-btn">
+        Next
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="invoices().length === 0" class="empty-state">
+      <p>No invoices found.</p>
+    </div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <app-invoice-modal
+    [invoice]="selectedInvoice()"
+    [isOpen]="isModalOpen()"
+    [mode]="modalMode()"
+    (closeModal)="closeModal()"
+    (saveInvoice)="onSaveInvoice($event)">
+  </app-invoice-modal>
+</div>

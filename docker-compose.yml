@@ -1,0 +1,35 @@
+services:
+  # Laravel API Backend
+  app:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./laravel:/var/www/html
+      - ./laravel/storage:/var/www/html/storage
+    networks:
+      - app-network
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./angular
+      dockerfile: Dockerfile
+    container_name: angular-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./angular:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,21 @@
+{
+  "name": "abss-technical-assessment",
+  "version": "1.0.0",
+  "description": "Invoice Management System - Laravel API + Angular Frontend",
+  "scripts": {
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:setup": "npm run docker:build && npm run docker:up && npm run docker:wait && npm run docker:migrate",
+    "docker:wait": "echo 'Waiting for services to start...' && sleep 10",
+    "docker:migrate": "docker-compose exec app php artisan migrate --force",
+    "docker:seed": "docker-compose exec app php artisan db:seed --force",
+    "docker:fresh": "docker-compose exec app php artisan migrate:fresh --seed --force",
+    "docker:key": "docker-compose exec app php artisan key:generate --force",
+    "docker:restart": "npm run docker:down && npm run docker:up",
+    "docker:clean": "docker-compose down -v --rmi all --remove-orphans"
+  },
+  "keywords": ["laravel", "angular", "docker", "invoice-management"],
+  "private": true
+}

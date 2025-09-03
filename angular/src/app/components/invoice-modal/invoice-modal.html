@@ -1,0 +1,175 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()" (keydown.escape)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" [attr.aria-labelledby]="'modal-title'">
+    <div class="modal-header">
+      <h2 id="modal-title">{{ isViewMode() ? 'View' : 'Edit' }} Invoice</h2>
+      <button class="close-btn" (click)="onClose()" aria-label="Close modal">&times;</button>
+    </div>
+
+    <div class="modal-body" *ngIf="editedInvoice()">
+      <!-- Error Message -->
+      <div *ngIf="error()" class="error-message">
+        {{ error() }}
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="success()" class="success-message">
+        {{ success() }}
+      </div>
+
+      <!-- Invoice Details -->
+      <div class="invoice-details">
+        <div class="detail-row">
+          <label for="invoice-number">Invoice Number:</label>
+          <div *ngIf="isEditMode()" class="input-group">
+            <input
+              id="invoice-number"
+              type="text"
+              [(ngModel)]="editedInvoice()!.number"
+              class="form-input">
+            <button
+              type="button"
+              class="generate-btn"
+              (click)="suggestNewInvoiceNumber()"
+              title="Generate unique invoice number">
+              Generate
+            </button>
+          </div>
+          <span *ngIf="isViewMode()">{{ editedInvoice()!.number }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label for="invoice-date">Date:</label>
+          <input
+            *ngIf="isEditMode()"
+            id="invoice-date"
+            type="date"
+            [(ngModel)]="editedInvoice()!.date"
+            class="form-input">
+          <span *ngIf="isViewMode()">{{ editedInvoice()!.date | date:'mediumDate' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label for="customer-name">Customer Name:</label>
+          <input
+            *ngIf="isEditMode()"
+            id="customer-name"
+            type="text"
+            [(ngModel)]="editedInvoice()!.customer_name"
+            class="form-input">
+          <span *ngIf="isViewMode()">{{ editedInvoice()!.customer_name }}</span>
+        </div>
+
+        <div class="detail-row">
+          <label for="invoice-reference">Reference:</label>
+          <input
+            *ngIf="isEditMode()"
+            id="invoice-reference"
+            type="text"
+            [(ngModel)]="editedInvoice()!.reference"
+            class="form-input">
+          <span *ngIf="isViewMode()">{{ editedInvoice()!.reference }}</span>
+        </div>
+      </div>
+
+      <!-- Invoice Items -->
+      <div class="invoice-items">
+        <div class="items-header">
+          <h3>Invoice Items</h3>
+          <button
+            *ngIf="isEditMode()"
+            class="add-item-btn"
+            (click)="addItem()">
+            Add Item
+          </button>
+        </div>
+
+        <div class="items-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total Amount</th>
+                <th *ngIf="isEditMode()">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of editedInvoice()!.invoice_items; let i = index">
+                <td>
+                  <input
+                    *ngIf="isEditMode()"
+                    type="text"
+                    [value]="item.product_name"
+                    (input)="updateItem(i, 'product_name', $event.target.value)"
+                    placeholder="Product name"
+                    class="form-input">
+                  <span *ngIf="isViewMode()">{{ item.product_name }}</span>
+                </td>
+                <td>
+                  <input
+                    *ngIf="isEditMode()"
+                    type="number"
+                    step="0.01"
+                    [value]="item.unit_price"
+                    (input)="updateItem(i, 'unit_price', $event.target.value)"
+                    placeholder="Unit price"
+                    class="form-input">
+                  <span *ngIf="isViewMode()">${{ item.unit_price | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <input
+                    *ngIf="isEditMode()"
+                    type="number"
+                    min="1"
+                    [value]="item.quantity"
+                    (input)="updateItem(i, 'quantity', +$event.target.value)"
+                    placeholder="Quantity"
+                    class="form-input">
+                  <span *ngIf="isViewMode()">{{ item.quantity }}</span>
+                </td>
+                <td>
+                  <span>${{ item.total_amount | number:'1.2-2' }}</span>
+                </td>
+                <td *ngIf="isEditMode()">
+                  <button
+                    class="remove-btn"
+                    (click)="removeItem(i)"
+                    [disabled]="editedInvoice()!.invoice_items.length === 1">
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Total -->
+        <div class="invoice-total">
+          <strong>Total: ${{ getTotalAmount() | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="onClose()">
+        {{ isViewMode() ? 'Close' : 'Cancel' }}
+      </button>
+      <div *ngIf="isEditMode()" class="edit-actions">
+        <button
+          class="reset-btn"
+          (click)="onReset()"
+          [disabled]="!hasChanges()"
+          title="Reset all changes to original values">
+          Reset
+        </button>
+        <button
+          class="save-btn"
+          (click)="onSave()"
+          [disabled]="loading()">
+          {{ loading() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
